@@ -56,6 +56,40 @@ def send_command(command, timeout=120):
         return None
 
 
+def send_command_raw(command, timeout=120):
+    """Send a Python command to UE5 and return the raw result dict.
+    Same as send_command but without any print side effects.
+    Used by the agent system for programmatic access."""
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        sock.connect(('127.0.0.1', PORT))
+        sock.sendall(command.encode('utf-8') + b'\n__END__\n')
+
+        data = b''
+        while True:
+            try:
+                chunk = sock.recv(65536)
+                if not chunk:
+                    break
+                data += chunk
+            except socket.timeout:
+                break
+        sock.close()
+
+        if data:
+            return json.loads(data.decode('utf-8'))
+        return None
+    except (ConnectionRefusedError, OSError, json.JSONDecodeError):
+        return None
+
+
+def is_connected(timeout=5.0):
+    """Check if UE5 listener is responsive. Returns True/False."""
+    result = send_command_raw("unreal.log('AGENT_PING')", timeout=timeout)
+    return result is not None and result.get('success', False)
+
+
 def take_screenshot(viewport_only=False):
     """Capture the UE5 viewport using in-engine HighResShot."""
     from ue_capture import capture_ue5

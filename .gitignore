@@ -35,3 +35,13 @@ desktop.ini
 # Temp
 *.tmp
 *.bak
+
+# Agent runtime data (generated, not source)
+agent_data/screenshots/
+agent_data/history/
+agent_data/sessions/
+agent_data/manifest.json
+agent_data/manifest_compressed.json
+agent_data/decision_log.json
+agent_data/zone_summaries/
+agent_data/skills/

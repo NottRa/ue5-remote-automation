@@ -62,7 +62,8 @@ def _send_command(command, timeout=30):
 
 def capture_ue5(viewport_only=False, camera_pos=None, camera_rot=None,
                 width=CAPTURE_WIDTH, height=CAPTURE_HEIGHT,
-                exposure_bias=CAPTURE_EXPOSURE_BIAS, auto_delete=True):
+                exposure_bias=CAPTURE_EXPOSURE_BIAS, auto_delete=True,
+                fov_deg=None, lumen_override=False):
     """
     Capture the UE5 viewport using in-engine SceneCapture2D.
 
@@ -77,6 +78,8 @@ def capture_ue5(viewport_only=False, camera_pos=None, camera_rot=None,
         height: Render target height.
         exposure_bias: Manual exposure bias for the capture.
         auto_delete: If True, only keep the latest screenshot (saves storage).
+        fov_deg: Override field of view in degrees. None = default.
+        lumen_override: If True, force Lumen GI+Reflections on capture component.
 
     Returns:
         Path to saved screenshot, or None on failure.
@@ -131,6 +134,31 @@ pp.set_editor_property('auto_exposure_method', unreal.AutoExposureMethod.AEM_MAN
 pp.set_editor_property('override_auto_exposure_bias', True)
 pp.set_editor_property('auto_exposure_bias', {exposure_bias})
 comp.post_process_blend_weight = 1.0
+"""
+
+    # Add Lumen override if requested
+    if lumen_override:
+        capture_script += """
+# Force Lumen GI and Reflections on capture component
+try:
+    pp.set_editor_property('override_dynamic_global_illumination_method', True)
+    pp.set_editor_property('dynamic_global_illumination_method', unreal.DynamicGlobalIlluminationMethod.LUMEN)
+except:
+    pass
+try:
+    pp.set_editor_property('override_reflection_method', True)
+    pp.set_editor_property('reflection_method', unreal.ReflectionMethod.LUMEN)
+except:
+    pass
+"""
+
+    # Add FOV override if requested
+    if fov_deg is not None:
+        capture_script += f"""
+comp.set_editor_property('fov_angle', {fov_deg})
+"""
+
+    capture_script += f"""
 
 # Capture and export
 comp.capture_scene()
