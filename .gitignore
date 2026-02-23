@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# Screenshots (generated, not source)
+Screenshots/
+*.png
+*.jpg
+*.bmp
+*.exr
+*.hdr
+
+# UE5 exports
+*.obj
+*.fbx
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Temp
+*.tmp
+*.bak
